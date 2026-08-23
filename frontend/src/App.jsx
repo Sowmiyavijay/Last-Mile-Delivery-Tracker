@@ -10,6 +10,8 @@ import RateCardManagement from './pages/admin/RateCardManagement';
 import CodSurchargeManagement from './pages/admin/CodSurchargeManagement';
 import CreateOrderPage from './pages/CreateOrderPage';
 import MyOrdersPage from './pages/MyOrdersPage';
+import AgentManagement from './pages/admin/AgentManagement';
+import OrderAssignment from './pages/admin/OrderAssignment';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -38,6 +40,8 @@ function App() {
       <Route path="/admin/areas" element={<ProtectedRoute><AreaManagement /></ProtectedRoute>} />
       <Route path="/admin/rate-cards" element={<ProtectedRoute><RateCardManagement /></ProtectedRoute>} />
       <Route path="/admin/cod-surcharges" element={<ProtectedRoute><CodSurchargeManagement /></ProtectedRoute>} />
+      <Route path="/admin/agents" element={<ProtectedRoute><AgentManagement /></ProtectedRoute>} />
+      <Route path="/admin/assignments" element={<ProtectedRoute><OrderAssignment /></ProtectedRoute>} />
       <Route path="/orders/create" element={<ProtectedRoute><CreateOrderPage /></ProtectedRoute>} />
       <Route path="/orders/my" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />

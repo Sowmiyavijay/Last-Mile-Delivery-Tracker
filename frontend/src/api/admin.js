@@ -22,4 +22,15 @@ export const adminApi = {
     // COD Surcharges
     getCodSurcharges: () => apiClient.get('/api/admin/cod-surcharges'),
     updateCodSurcharge: (orderType, data) => apiClient.put(`/api/admin/cod-surcharges/${orderType}`, data),
+
+    // Delivery Agents
+    getAgents: () => apiClient.get('/api/admin/agents'),
+    createAgent: (data) => apiClient.post('/api/admin/agents', data),
+    updateAgent: (id, data) => apiClient.put(`/api/admin/agents/${id}`, data),
+    updateAvailability: (id, available) => apiClient.patch(`/api/admin/agents/${id}/availability?available=${available}`),
+
+    // Order Assignment
+    getOrder: (orderId) => apiClient.get(`/api/admin/orders/${orderId}`),
+    manualAssign: (orderId, agentId) => apiClient.put(`/api/admin/orders/${orderId}/assign/${agentId}`),
+    autoAssign: (orderId) => apiClient.post(`/api/admin/orders/${orderId}/auto-assign`),
 };

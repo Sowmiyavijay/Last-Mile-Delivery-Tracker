@@ -71,6 +71,13 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_agent_id")
+    private DeliveryAgent assignedAgent;
+
+    @Column
+    private LocalDateTime assignedAt;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
