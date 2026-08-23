@@ -48,6 +48,16 @@ function DashboardPage() {
           </ul>
         </div>
       )}
+
+      {user?.role === 'CUSTOMER' && (
+        <div style={{ marginTop: '2rem' }}>
+          <h3>Customer Actions</h3>
+          <ul style={{ display: 'flex', gap: '1rem', listStyle: 'none', padding: 0 }}>
+            <li><Link to="/orders/create" className="btn btn-primary">Create Order</Link></li>
+            <li><Link to="/orders/my" className="btn btn-primary">My Orders</Link></li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,8 @@ import ZoneManagement from './pages/admin/ZoneManagement';
 import AreaManagement from './pages/admin/AreaManagement';
 import RateCardManagement from './pages/admin/RateCardManagement';
 import CodSurchargeManagement from './pages/admin/CodSurchargeManagement';
+import CreateOrderPage from './pages/CreateOrderPage';
+import MyOrdersPage from './pages/MyOrdersPage';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -36,6 +38,8 @@ function App() {
       <Route path="/admin/areas" element={<ProtectedRoute><AreaManagement /></ProtectedRoute>} />
       <Route path="/admin/rate-cards" element={<ProtectedRoute><RateCardManagement /></ProtectedRoute>} />
       <Route path="/admin/cod-surcharges" element={<ProtectedRoute><CodSurchargeManagement /></ProtectedRoute>} />
+      <Route path="/orders/create" element={<ProtectedRoute><CreateOrderPage /></ProtectedRoute>} />
+      <Route path="/orders/my" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
