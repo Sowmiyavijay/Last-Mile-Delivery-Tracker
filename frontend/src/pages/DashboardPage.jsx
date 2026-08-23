@@ -60,6 +60,13 @@ function DashboardPage() {
           </ul>
         </div>
       )}
+
+      {user?.role === 'DELIVERY_AGENT' && (
+        <div style={{ marginTop: '2rem' }}>
+          <h3>Delivery Actions</h3>
+          <Link to="/agent/orders" className="btn btn-primary" style={{ width: 'auto' }}>Assigned Orders</Link>
+        </div>
+      )}
     </div>
   );
 }

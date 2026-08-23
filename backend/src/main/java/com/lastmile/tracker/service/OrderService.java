@@ -6,6 +6,7 @@ import com.lastmile.tracker.dto.order.PriceCalculationRequest;
 import com.lastmile.tracker.dto.order.PriceCalculationResponse;
 import com.lastmile.tracker.entity.Order;
 import com.lastmile.tracker.entity.User;
+import com.lastmile.tracker.enums.OrderStatus;
 import com.lastmile.tracker.exception.ResourceNotFoundException;
 import com.lastmile.tracker.repository.UserRepository;
 import com.lastmile.tracker.repository.OrderRepository;
@@ -22,6 +23,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final PricingService pricingService;
     private final UserRepository userRepository;
+    private final TrackingHistoryService trackingHistoryService;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request, String customerEmail) {
@@ -59,7 +61,9 @@ public class OrderService {
                 .deliveryCharge(priceRes.getFinalCharge())
                 .build();
 
-        return toResponse(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+        trackingHistoryService.append(savedOrder, OrderStatus.PENDING, customer);
+        return toResponse(savedOrder);
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +85,16 @@ public class OrderService {
                 .toList();
     }
 
-    private OrderResponse toResponse(Order order) {
+            @Transactional(readOnly = true)
+            public List<OrderResponse> getAssignedOrders(String agentEmail) {
+            User agent = userRepository.findByEmail(agentEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Delivery agent not found"));
+            return orderRepository.findByAssignedAgentUserIdOrderByCreatedAtDesc(agent.getId()).stream()
+                .map(this::toResponse)
+                .toList();
+            }
+
+    OrderResponse toResponse(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
                 .pickupAddress(order.getPickupAddress())

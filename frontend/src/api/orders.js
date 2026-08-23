@@ -5,4 +5,7 @@ export const orderApi = {
     createOrder: (data) => apiClient.post('/api/orders', data),
     getMyOrders: () => apiClient.get('/api/orders/my'),
     getOrderById: (id) => apiClient.get(`/api/orders/${id}`),
+    getTracking: (id) => apiClient.get(`/api/orders/${id}/tracking`),
+    updateStatus: (id, status) => apiClient.put(`/api/orders/${id}/status`, { status }),
+    getAssignedOrders: () => apiClient.get('/api/agent/orders'),
 };

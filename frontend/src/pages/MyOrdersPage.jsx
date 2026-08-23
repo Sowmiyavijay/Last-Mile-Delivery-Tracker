@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { orderApi } from '../api/orders';
+import { Link } from 'react-router-dom';
 
 function MyOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -40,6 +41,7 @@ function MyOrdersPage() {
               <th>Amount</th>
               <th>Status</th>
               <th>Date</th>
+              <th>Tracking</th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +55,7 @@ function MyOrdersPage() {
                 <td>{o.deliveryCharge}</td>
                 <td>{o.status}</td>
                 <td>{new Date(o.createdAt).toLocaleString()}</td>
+                <td><Link to={`/orders/${o.id}/tracking`}>Track</Link></td>
               </tr>
             ))}
           </tbody>

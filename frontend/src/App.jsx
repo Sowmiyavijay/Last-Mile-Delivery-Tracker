@@ -12,6 +12,8 @@ import CreateOrderPage from './pages/CreateOrderPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import AgentManagement from './pages/admin/AgentManagement';
 import OrderAssignment from './pages/admin/OrderAssignment';
+import OrderTrackingPage from './pages/OrderTrackingPage';
+import AgentOrdersPage from './pages/AgentOrdersPage';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -44,6 +46,8 @@ function App() {
       <Route path="/admin/assignments" element={<ProtectedRoute><OrderAssignment /></ProtectedRoute>} />
       <Route path="/orders/create" element={<ProtectedRoute><CreateOrderPage /></ProtectedRoute>} />
       <Route path="/orders/my" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
+      <Route path="/orders/:id/tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
+      <Route path="/agent/orders" element={<ProtectedRoute><AgentOrdersPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
