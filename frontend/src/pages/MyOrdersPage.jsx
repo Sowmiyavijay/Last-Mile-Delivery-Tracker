@@ -28,15 +28,15 @@ function MyOrdersPage() {
     fetchOrders();
   }, []);
 
-  if (loading) return <div>Loading orders...</div>;
+  if (loading) return <div className="dashboard"><div className="loading-card">Loading your orders...</div></div>;
 
   return (
-    <div>
-      <h2>My Orders</h2>
+    <div className="dashboard">
+      <div className="dashboard-header"><div><p className="eyebrow">Customer workspace</p><h1>My Orders</h1></div><Link to="/dashboard" className="btn btn-secondary" style={{ width: 'auto' }}>Back</Link></div>
       {orders.length === 0 ? (
         <p>You have no orders yet.</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div className="table-wrap"><table className="data-table">
           <thead>
             <tr style={{ borderBottom: '1px solid #ddd' }}>
               <th>ID</th>
@@ -45,6 +45,7 @@ function MyOrdersPage() {
               <th>Type</th>
               <th>Payment</th>
               <th>Amount</th>
+              <th>Weight</th>
               <th>Status</th>
               <th>Date</th>
               <th>Tracking</th>
@@ -60,7 +61,8 @@ function MyOrdersPage() {
                 <td>{o.orderType}</td>
                 <td>{o.paymentType}</td>
                 <td>{o.deliveryCharge}</td>
-                <td>{o.status}</td>
+                <td>{o.billingWeight} kg</td>
+                <td><span className={`status-badge status-${o.status.toLowerCase()}`}>{o.status.replaceAll('_', ' ')}</span></td>
                 <td>{new Date(o.createdAt).toLocaleString()}</td>
                 <td><Link to={`/orders/${o.id}/tracking`}>Track</Link></td>
                 <td>
@@ -76,7 +78,7 @@ function MyOrdersPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
     </div>
   );

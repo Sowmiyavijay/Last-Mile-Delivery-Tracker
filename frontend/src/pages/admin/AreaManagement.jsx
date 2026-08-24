@@ -40,11 +40,25 @@ function AreaManagement() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Delete this area?')) return;
     try {
       await adminApi.deleteArea(id);
       fetchData();
     } catch (e) {
       alert("Error deleting area: " + (e.response?.data?.message || "unknown"));
+    }
+  };
+
+  const handleEdit = async (area) => {
+    const nextName = window.prompt('Area name', area.name);
+    if (nextName === null) return;
+    const nextPincode = window.prompt('Pincode', area.pincode);
+    if (nextPincode === null) return;
+    try {
+      await adminApi.updateArea(area.id, { name: nextName, pincode: nextPincode, zoneId: area.zoneId });
+      fetchData();
+    } catch (e) {
+      alert(e.response?.data?.message || 'Unable to update area.');
     }
   };
 
@@ -63,7 +77,7 @@ function AreaManagement() {
       <ul>
         {areas.map(a => (
           <li key={a.id}>
-            {a.name} ({a.pincode}) - Zone: {a.zoneName} <button onClick={() => handleDelete(a.id)}>Delete</button>
+            {a.name} ({a.pincode}) - Zone: {a.zoneName} <button onClick={() => handleEdit(a)}>Edit</button> <button onClick={() => handleDelete(a.id)}>Delete</button>
           </li>
         ))}
       </ul>

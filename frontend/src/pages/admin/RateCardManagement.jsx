@@ -41,11 +41,25 @@ function RateCardManagement() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Delete this rate card?')) return;
     try {
       await adminApi.deleteRateCard(id);
       fetchData();
     } catch (e) {
       alert("Error deleting rate card: " + (e.response?.data?.message || "unknown"));
+    }
+  };
+
+  const handleEdit = async (rateCard) => {
+    const baseRate = window.prompt('Base rate', rateCard.baseRate);
+    if (baseRate === null) return;
+    const ratePerKg = window.prompt('Rate per kg', rateCard.ratePerKg);
+    if (ratePerKg === null) return;
+    try {
+      await adminApi.updateRateCard(rateCard.id, { ...rateCard, baseRate, ratePerKg, pickupZoneId: rateCard.pickupZoneId, dropZoneId: rateCard.dropZoneId });
+      fetchData();
+    } catch (e) {
+      alert(e.response?.data?.message || 'Unable to update rate card.');
     }
   };
 
@@ -76,7 +90,7 @@ function RateCardManagement() {
         {rateCards.map(rc => (
           <li key={rc.id}>
             {rc.rateType} - {rc.orderType} | {rc.pickupZoneName} to {rc.dropZoneName} | Base: {rc.baseRate}, Per Kg: {rc.ratePerKg} 
-            <button onClick={() => handleDelete(rc.id)}>Delete</button>
+            <button onClick={() => handleEdit(rc)}>Edit</button> <button onClick={() => handleDelete(rc.id)}>Delete</button>
           </li>
         ))}
       </ul>

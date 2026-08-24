@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { orderApi } from '../api/orders';
 
 function CreateOrderPage() {
@@ -17,77 +18,89 @@ function CreateOrderPage() {
 
   const [priceData, setPriceData] = useState(null);
   const [orderRes, setOrderRes] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const calculatePrice = async (e) => {
     e.preventDefault();
     setPriceData(null);
     setOrderRes(null);
+    setError('');
+    setLoading(true);
     try {
       const { data } = await orderApi.calculatePrice(form);
       setPriceData(data);
     } catch (e) {
-      alert("Error calculating price: " + (e.response?.data?.message || "Unknown error"));
+      setError(e.response?.data?.message || 'Unable to calculate a price. Check the shipment details.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const confirmOrder = async () => {
+    setError('');
+    setLoading(true);
     try {
       const { data } = await orderApi.createOrder(form);
       setOrderRes(data);
     } catch (e) {
-      alert("Error creating order: " + (e.response?.data?.message || "Unknown error"));
+      setError(e.response?.data?.message || 'Unable to create the order.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2>Create Order</h2>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <div><p className="eyebrow">Shipment desk</p><h1>Create Order</h1></div>
+        <Link to="/dashboard" className="btn btn-secondary" style={{ width: 'auto' }}>Back</Link>
+      </div>
+      {error && <p className="error-message">{error}</p>}
       {orderRes ? (
-        <div style={{ padding: '1rem', border: '1px solid green', marginBottom: '1rem' }}>
+        <div className="success-message order-success">
           <h3>Order Created Successfully!</h3>
           <p>Order ID: {orderRes.id}</p>
           <p>Final Charge: {orderRes.deliveryCharge}</p>
           <p>Status: {orderRes.status}</p>
+          <Link to="/orders/my" className="btn btn-primary" style={{ width: 'auto', marginTop: '1rem' }}>View My Orders</Link>
         </div>
       ) : (
         <>
-          <form onSubmit={calculatePrice} style={{ display: 'grid', gap: '0.5rem', maxWidth: '400px' }}>
-            <label>Pickup Address: <input value={form.pickupAddress} onChange={e => setForm({...form, pickupAddress: e.target.value})} required /></label>
-            <label>Pickup Pincode: <input value={form.pickupPincode} onChange={e => setForm({...form, pickupPincode: e.target.value})} required maxLength="6" /></label>
-            <label>Drop Address: <input value={form.dropAddress} onChange={e => setForm({...form, dropAddress: e.target.value})} required /></label>
-            <label>Drop Pincode: <input value={form.dropPincode} onChange={e => setForm({...form, dropPincode: e.target.value})} required maxLength="6" /></label>
-            
-            <label>Order Type: 
-              <select value={form.orderType} onChange={e => setForm({...form, orderType: e.target.value})}>
+          <form onSubmit={calculatePrice} className="form-panel">
+            <div className="form-grid">
+            <label>Pickup Address<input value={form.pickupAddress} onChange={e => setForm({...form, pickupAddress: e.target.value})} required /></label>
+            <label>Pickup Pincode<input value={form.pickupPincode} onChange={e => setForm({...form, pickupPincode: e.target.value.replace(/\D/g, '')})} required maxLength="6" pattern="[0-9]{6}" /></label>
+            <label>Drop Address<input value={form.dropAddress} onChange={e => setForm({...form, dropAddress: e.target.value})} required /></label>
+            <label>Drop Pincode<input value={form.dropPincode} onChange={e => setForm({...form, dropPincode: e.target.value.replace(/\D/g, '')})} required maxLength="6" pattern="[0-9]{6}" /></label>
+            <label>Order Type<select value={form.orderType} onChange={e => setForm({...form, orderType: e.target.value})}>
                 <option value="B2B">B2B</option>
                 <option value="B2C">B2C</option>
-              </select>
-            </label>
-            
-            <label>Payment Type: 
-              <select value={form.paymentType} onChange={e => setForm({...form, paymentType: e.target.value})}>
+              </select></label>
+            <label>Payment Type<select value={form.paymentType} onChange={e => setForm({...form, paymentType: e.target.value})}>
                 <option value="PREPAID">PREPAID</option>
                 <option value="COD">COD</option>
-              </select>
-            </label>
-            
-            <label>Actual Weight (kg): <input type="number" step="0.01" value={form.actualWeight} onChange={e => setForm({...form, actualWeight: e.target.value})} required /></label>
-            <label>Length (cm): <input type="number" step="0.01" value={form.length} onChange={e => setForm({...form, length: e.target.value})} required /></label>
-            <label>Width (cm): <input type="number" step="0.01" value={form.width} onChange={e => setForm({...form, width: e.target.value})} required /></label>
-            <label>Height (cm): <input type="number" step="0.01" value={form.height} onChange={e => setForm({...form, height: e.target.value})} required /></label>
-            
-            <button type="submit" className="btn btn-primary">Calculate Price</button>
+              </select></label>
+            <label>Actual Weight (kg)<input type="number" min="0.01" step="0.01" value={form.actualWeight} onChange={e => setForm({...form, actualWeight: e.target.value})} required /></label>
+            <label>Length (cm)<input type="number" min="0.01" step="0.01" value={form.length} onChange={e => setForm({...form, length: e.target.value})} required /></label>
+            <label>Breadth (cm)<input type="number" min="0.01" step="0.01" value={form.width} onChange={e => setForm({...form, width: e.target.value})} required /></label>
+            <label>Height (cm)<input type="number" min="0.01" step="0.01" value={form.height} onChange={e => setForm({...form, height: e.target.value})} required /></label>
+            </div>
+            <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Calculating...' : 'Calculate Price'}</button>
           </form>
 
           {priceData && (
-            <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #ccc' }}>
-              <h3>Price Quotation</h3>
-              <p>Setup: {priceData.pickupZoneName} ➔ {priceData.dropZoneName} ({priceData.rateType})</p>
-              <p>Actual Weight: {priceData.actualWeight} | Volumetric: {priceData.volumetricWeight} | Billing: {priceData.billingWeight}</p>
-              <p>Base Rate: {priceData.baseRate} | Rate/Kg: {priceData.ratePerKg}</p>
-              <p>Delivery: {priceData.deliveryCharge} + COD: {priceData.codSurcharge}</p>
-              <h4>Final Charge: {priceData.finalCharge}</h4>
-              <button type="button" onClick={confirmOrder} className="btn btn-primary" style={{ marginTop: '1rem' }}>Confirm Order</button>
+            <div className="quote-panel">
+              <div className="section-heading"><div><p className="eyebrow">Backend quotation</p><h2>Price breakdown</h2></div><span className="status-badge status-pending">{priceData.rateType}</span></div>
+              <div className="quote-grid">
+                <span>Route</span><strong>{priceData.pickupZoneName} to {priceData.dropZoneName}</strong>
+                <span>Chargeable weight</span><strong>{priceData.billingWeight} kg</strong>
+                <span>Base rate</span><strong>{priceData.baseRate}</strong>
+                <span>Weight charge</span><strong>{priceData.deliveryCharge}</strong>
+                <span>COD surcharge</span><strong>{priceData.codSurcharge}</strong>
+                <span className="quote-total">Final delivery charge</span><strong className="quote-total">{priceData.finalCharge}</strong>
+              </div>
+              <button type="button" onClick={confirmOrder} className="btn btn-primary" disabled={loading}>{loading ? 'Creating...' : 'Confirm Order'}</button>
             </div>
           )}
         </>

@@ -8,6 +8,7 @@ import com.lastmile.tracker.entity.User;
 import com.lastmile.tracker.enums.OrderStatus;
 import com.lastmile.tracker.enums.RescheduleStatus;
 import com.lastmile.tracker.enums.Role;
+import com.lastmile.tracker.enums.NotificationType;
 import com.lastmile.tracker.exception.ResourceNotFoundException;
 import com.lastmile.tracker.repository.OrderRepository;
 import com.lastmile.tracker.repository.RescheduleRequestRepository;
@@ -33,6 +34,7 @@ public class RescheduleRequestService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final TrackingHistoryService trackingHistoryService;
+    private final NotificationService notificationService;
 
     @Transactional
     public RescheduleRequestResponse create(Long orderId, CreateRescheduleRequest request) {
@@ -57,6 +59,8 @@ public class RescheduleRequestService {
                 .reason(request.getReason())
                 .status(RescheduleStatus.REQUESTED)
                 .build());
+            notificationService.notifyAdmins(saved.getOrder(), NotificationType.RESCHEDULE_REQUESTED,
+                "Reschedule Request", "Order #" + orderId + " requested rescheduling for " + request.getRequestedDate() + ".");
         return toResponse(saved);
     }
 
@@ -100,6 +104,8 @@ public class RescheduleRequestService {
         rescheduleRequestRepository.save(request);
         orderRepository.save(order);
         trackingHistoryService.append(order, OrderStatus.PENDING, admin);
+        notificationService.notifyCustomer(order.getCustomer(), order, NotificationType.RESCHEDULE_APPROVED,
+            "Reschedule Approved", "Your reschedule request for order #" + order.getId() + " was approved.");
         return toResponse(request);
     }
 
@@ -109,6 +115,9 @@ public class RescheduleRequestService {
         RescheduleRequest request = findRequest(id);
         requireStatus(request, RescheduleStatus.REQUESTED);
         request.setStatus(RescheduleStatus.REJECTED);
+        notificationService.notifyCustomer(request.getOrder().getCustomer(), request.getOrder(),
+            NotificationType.RESCHEDULE_REJECTED, "Reschedule Rejected",
+            "Your reschedule request for order #" + request.getOrder().getId() + " was rejected.");
         return toResponse(rescheduleRequestRepository.save(request));
     }
 

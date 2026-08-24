@@ -41,9 +41,9 @@ function AgentOrdersPage() {
         <div className="user-info">
           {orders.map(order => (
             <div key={order.id} style={{ borderBottom: '1px solid #e2e8f0', padding: '1rem 0' }}>
-              <strong>Order #{order.id}</strong> | {order.pickupPincode} to {order.dropPincode} | {order.status}
+              <strong>Order #{order.id}</strong><span className="route-label">{order.pickupPincode} to {order.dropPincode}</span><span className={`status-badge status-${order.status.toLowerCase()}`}>{order.status.replaceAll('_', ' ')}</span>
               <div style={{ marginTop: '0.5rem' }}>
-                {nextStatuses[order.status].map(status => (
+                {(nextStatuses[order.status] || []).map(status => (
                   <button key={status} type="button" className="btn btn-primary" style={{ width: 'auto', marginRight: '0.5rem' }} onClick={() => updateStatus(order.id, status)}>{status}</button>
                 ))}
                 <Link to={`/orders/${order.id}/tracking`}>Track</Link>

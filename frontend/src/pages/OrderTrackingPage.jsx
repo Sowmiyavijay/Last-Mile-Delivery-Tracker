@@ -26,10 +26,10 @@ function OrderTrackingPage() {
       </div>
       <div className="user-info">
         {history.length === 0 ? <p>No tracking events recorded.</p> : (
-          <ol style={{ paddingLeft: '1.5rem' }}>
+          <ol className="timeline">
             {history.map((event, index) => (
-              <li key={`${event.timestamp}-${index}`} style={{ marginBottom: '1rem' }}>
-                <strong>{event.status}</strong>
+              <li key={`${event.timestamp}-${index}`} className="timeline-item">
+                <span className={`status-badge status-${event.status.toLowerCase()}`}>{event.status.replaceAll('_', ' ')}</span>
                 <div>{new Date(event.timestamp).toLocaleString()}</div>
                 <small>{event.actorName} ({event.actorRole})</small>
               </li>

@@ -1,0 +1,14 @@
+package com.lastmile.tracker.enums;
+
+public enum NotificationType {
+    ORDER_CREATED,
+    ORDER_ASSIGNED,
+    ORDER_PICKED_UP,
+    ORDER_IN_TRANSIT,
+    ORDER_OUT_FOR_DELIVERY,
+    ORDER_DELIVERED,
+    DELIVERY_FAILED,
+    RESCHEDULE_REQUESTED,
+    RESCHEDULE_APPROVED,
+    RESCHEDULE_REJECTED
+}

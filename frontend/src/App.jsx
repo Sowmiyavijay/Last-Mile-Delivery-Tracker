@@ -16,6 +16,7 @@ import OrderTrackingPage from './pages/OrderTrackingPage';
 import AgentOrdersPage from './pages/AgentOrdersPage';
 import RescheduleRequestPage from './pages/RescheduleRequestPage';
 import RescheduleManagement from './pages/admin/RescheduleManagement';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -40,18 +41,19 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/admin/zones" element={<ProtectedRoute><ZoneManagement /></ProtectedRoute>} />
-      <Route path="/admin/areas" element={<ProtectedRoute><AreaManagement /></ProtectedRoute>} />
-      <Route path="/admin/rate-cards" element={<ProtectedRoute><RateCardManagement /></ProtectedRoute>} />
-      <Route path="/admin/cod-surcharges" element={<ProtectedRoute><CodSurchargeManagement /></ProtectedRoute>} />
-      <Route path="/admin/agents" element={<ProtectedRoute><AgentManagement /></ProtectedRoute>} />
-      <Route path="/admin/assignments" element={<ProtectedRoute><OrderAssignment /></ProtectedRoute>} />
-      <Route path="/orders/create" element={<ProtectedRoute><CreateOrderPage /></ProtectedRoute>} />
-      <Route path="/orders/my" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
-      <Route path="/orders/:id/tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
-      <Route path="/orders/:id/reschedule" element={<ProtectedRoute><RescheduleRequestPage /></ProtectedRoute>} />
-      <Route path="/agent/orders" element={<ProtectedRoute><AgentOrdersPage /></ProtectedRoute>} />
-      <Route path="/admin/reschedule-requests" element={<ProtectedRoute><RescheduleManagement /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+      <Route path="/admin/zones" element={<ProtectedRoute roles={['ADMIN']}><ZoneManagement /></ProtectedRoute>} />
+      <Route path="/admin/areas" element={<ProtectedRoute roles={['ADMIN']}><AreaManagement /></ProtectedRoute>} />
+      <Route path="/admin/rate-cards" element={<ProtectedRoute roles={['ADMIN']}><RateCardManagement /></ProtectedRoute>} />
+      <Route path="/admin/cod-surcharges" element={<ProtectedRoute roles={['ADMIN']}><CodSurchargeManagement /></ProtectedRoute>} />
+      <Route path="/admin/agents" element={<ProtectedRoute roles={['ADMIN']}><AgentManagement /></ProtectedRoute>} />
+      <Route path="/admin/assignments" element={<ProtectedRoute roles={['ADMIN']}><OrderAssignment /></ProtectedRoute>} />
+      <Route path="/orders/create" element={<ProtectedRoute roles={['CUSTOMER']}><CreateOrderPage /></ProtectedRoute>} />
+      <Route path="/orders/my" element={<ProtectedRoute roles={['CUSTOMER']}><MyOrdersPage /></ProtectedRoute>} />
+      <Route path="/orders/:id/tracking" element={<ProtectedRoute roles={['CUSTOMER', 'DELIVERY_AGENT', 'ADMIN']}><OrderTrackingPage /></ProtectedRoute>} />
+      <Route path="/orders/:id/reschedule" element={<ProtectedRoute roles={['CUSTOMER']}><RescheduleRequestPage /></ProtectedRoute>} />
+      <Route path="/agent/orders" element={<ProtectedRoute roles={['DELIVERY_AGENT']}><AgentOrdersPage /></ProtectedRoute>} />
+      <Route path="/admin/reschedule-requests" element={<ProtectedRoute roles={['ADMIN']}><RescheduleManagement /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

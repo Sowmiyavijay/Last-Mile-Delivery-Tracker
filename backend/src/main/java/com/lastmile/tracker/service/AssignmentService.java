@@ -4,6 +4,7 @@ import com.lastmile.tracker.dto.area.AreaResponse;
 import com.lastmile.tracker.dto.order.OrderResponse;
 import com.lastmile.tracker.entity.DeliveryAgent;
 import com.lastmile.tracker.entity.Order;
+import com.lastmile.tracker.enums.NotificationType;
 import com.lastmile.tracker.exception.ResourceNotFoundException;
 import com.lastmile.tracker.repository.DeliveryAgentRepository;
 import com.lastmile.tracker.repository.OrderRepository;
@@ -22,6 +23,7 @@ public class AssignmentService {
     private final DeliveryAgentService deliveryAgentService;
     private final DeliveryAgentRepository deliveryAgentRepository;
     private final AreaService areaService;
+    private final NotificationService notificationService;
 
     @Transactional
     public void manualAssign(Long orderId, Long agentId) {
@@ -41,6 +43,7 @@ public class AssignmentService {
         order.setAssignedAgent(agent);
         order.setAssignedAt(LocalDateTime.now());
         orderRepository.save(order);
+        notifyAssignment(order);
     }
     
     @Transactional
@@ -61,6 +64,7 @@ public class AssignmentService {
             order.setAssignedAgent(primaryAgents.get(0));
             order.setAssignedAt(LocalDateTime.now());
             orderRepository.save(order);
+            notifyAssignment(order);
             return;
         }
         
@@ -70,9 +74,18 @@ public class AssignmentService {
             order.setAssignedAgent(fallbackAgents.get(0));
             order.setAssignedAt(LocalDateTime.now());
             orderRepository.save(order);
+            notifyAssignment(order);
             return;
         }
         
         throw new IllegalStateException("No available delivery agents to assign this order to.");
+    }
+
+    private void notifyAssignment(Order order) {
+        DeliveryAgent agent = order.getAssignedAgent();
+        notificationService.notifyAgent(agent, order, NotificationType.ORDER_ASSIGNED,
+                "New Order Assigned", "Order #" + order.getId() + " has been assigned to you.");
+        notificationService.notifyCustomer(order.getCustomer(), order, NotificationType.ORDER_ASSIGNED,
+                "Delivery Agent Assigned", "A delivery agent has been assigned to order #" + order.getId() + ".");
     }
 }

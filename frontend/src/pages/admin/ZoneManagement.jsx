@@ -32,11 +32,25 @@ function ZoneManagement() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Delete this zone?')) return;
     try {
       await adminApi.deleteZone(id);
       fetchZones();
     } catch (e) {
       alert("Error deleting zone: " + (e.response?.data?.message || "unknown"));
+    }
+  };
+
+  const handleEdit = async (zone) => {
+    const nextName = window.prompt('Zone name', zone.name);
+    if (nextName === null) return;
+    const nextDescription = window.prompt('Description', zone.description || '');
+    if (nextDescription === null) return;
+    try {
+      await adminApi.updateZone(zone.id, { name: nextName, description: nextDescription });
+      fetchZones();
+    } catch (e) {
+      alert(e.response?.data?.message || 'Unable to update zone.');
     }
   };
 
@@ -52,7 +66,7 @@ function ZoneManagement() {
       <ul>
         {zones.map(z => (
           <li key={z.id}>
-            {z.name} - {z.description} <button onClick={() => handleDelete(z.id)}>Delete</button>
+            {z.name} - {z.description} <button onClick={() => handleEdit(z)}>Edit</button> <button onClick={() => handleDelete(z.id)}>Delete</button>
           </li>
         ))}
       </ul>

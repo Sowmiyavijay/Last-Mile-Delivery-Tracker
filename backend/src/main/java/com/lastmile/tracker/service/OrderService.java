@@ -7,6 +7,7 @@ import com.lastmile.tracker.dto.order.PriceCalculationResponse;
 import com.lastmile.tracker.entity.Order;
 import com.lastmile.tracker.entity.User;
 import com.lastmile.tracker.enums.OrderStatus;
+import com.lastmile.tracker.enums.NotificationType;
 import com.lastmile.tracker.exception.ResourceNotFoundException;
 import com.lastmile.tracker.repository.UserRepository;
 import com.lastmile.tracker.repository.OrderRepository;
@@ -24,6 +25,7 @@ public class OrderService {
     private final PricingService pricingService;
     private final UserRepository userRepository;
     private final TrackingHistoryService trackingHistoryService;
+    private final NotificationService notificationService;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request, String customerEmail) {
@@ -63,6 +65,8 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
         trackingHistoryService.append(savedOrder, OrderStatus.PENDING, customer);
+        notificationService.notifyCustomer(customer, savedOrder, NotificationType.ORDER_CREATED,
+            "Order Created", "Order #" + savedOrder.getId() + " was created successfully.");
         return toResponse(savedOrder);
     }
 
