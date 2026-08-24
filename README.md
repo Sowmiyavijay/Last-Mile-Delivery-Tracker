@@ -1,8 +1,8 @@
 # Last-Mile Delivery Tracker
 
-**Phase 1: Foundation and Authentication**
+**Phases 1–9: Delivery Operations and Final Readiness**
 
-A modular monorepo for managing last-mile deliveries. This phase establishes the project foundation with JWT-based authentication. Future modules (zones, orders, tracking, notifications, etc.) will be added incrementally.
+A modular monorepo for managing last-mile deliveries from order creation through assignment, tracking, failed-delivery rescheduling, and notifications. The final phase focuses on integration verification, security hardening, documentation, and deployment readiness.
 
 ## Tech Stack
 
@@ -10,7 +10,7 @@ A modular monorepo for managing last-mile deliveries. This phase establishes the
 - Java 17
 - Spring Boot 3.x
 - Maven
-- Spring Web, Data JPA, Security
+- Spring Web, Data JPA, Security, Validation, Mail
 - JWT Authentication
 - PostgreSQL
 - Lombok, Bean Validation
@@ -21,7 +21,7 @@ A modular monorepo for managing last-mile deliveries. This phase establishes the
 - JavaScript
 - React Router
 - Axios
-- Basic CSS
+- Responsive CSS
 
 ## Project Structure
 
@@ -79,11 +79,16 @@ cp .env.example .env
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `DB_URL` | JDBC connection URL | `jdbc:postgresql://localhost:5432/lastmile_tracker` |
-| `DB_USERNAME` | Database username | `postgres` |
-| `DB_PASSWORD` | Database password | `postgres` |
-| `JWT_SECRET` | Secret key for JWT signing (min 32 chars) | — |
+| `DB_USERNAME` | Database username | required |
+| `DB_PASSWORD` | Database password | required |
+| `JWT_SECRET` | Secret key for JWT signing (min 32 chars) | required |
 | `JWT_EXPIRATION` | Token expiry in milliseconds | `86400000` (24 hours) |
-| `VITE_API_URL` | Backend API URL for frontend | `http://localhost:8080` |
+| `VITE_API_BASE_URL` | Backend API URL for frontend | `http://localhost:8080` |
+| `MAIL_HOST` | SMTP host for email notifications | optional |
+| `MAIL_PORT` | SMTP port | `587` |
+| `MAIL_USERNAME` | SMTP username | optional |
+| `MAIL_PASSWORD` | SMTP password | optional |
+| `MAIL_FROM` | Sender address | optional |
 
 For the backend, export environment variables before starting, or set them in your shell/IDE.
 
@@ -95,8 +100,8 @@ cd backend
 # Set environment variables (example for PowerShell)
 $env:DB_URL="jdbc:postgresql://localhost:5432/lastmile_tracker"
 $env:DB_USERNAME="postgres"
-$env:DB_PASSWORD="postgres"
-$env:JWT_SECRET="your-256-bit-secret-key-change-this-in-production-environment"
+$env:DB_PASSWORD="your-database-password"
+$env:JWT_SECRET="replace-with-a-random-secret-of-at-least-32-characters"
 
 mvn spring-boot:run
 ```
@@ -198,18 +203,76 @@ This phase adds configuration APIs and a basic admin UI for defining the logisti
 - `GET /api/admin/cod-surcharges` - Get current COD surcharges globally.
 - `PUT /api/admin/cod-surcharges/{orderType}` - Set cash-on-delivery surcharge for B2B or B2C orders.
 
-## Future Modules
+## Operations Workflows
 
-The following are intentionally **not** implemented in Phase 1 and 2:
+### Pricing
 
-- Order management
-- Delivery assignment
-- Agent location tracking
-- Order tracking
-- Failed delivery / rescheduling
-- Notifications
+The backend is the pricing source of truth. It resolves each pincode to a zone, selects `INTRA_ZONE` or `INTER_ZONE`, then applies the matching B2B/B2C rate card.
 
-The architecture is designed so these modules can be added without rewriting authentication or network configurations.
+```text
+Volumetric Weight = length × breadth × height / 5000
+Chargeable Weight = max(actual weight, volumetric weight)
+Final Price = base rate + weight-based charge + applicable COD surcharge
+```
+
+Customers request a quote through `POST /api/orders/price` before confirming an order with `POST /api/orders`.
+
+### Assignment and Tracking
+
+Admins can manually assign or auto-assign available delivery agents. Agents update assigned orders through the existing status API. Valid delivery progression is:
+
+```text
+PENDING → PICKED_UP → IN_TRANSIT → OUT_FOR_DELIVERY → DELIVERED
+                                                └──────→ FAILED
+```
+
+Tracking history is append-only and visible through `GET /api/orders/{id}/tracking`.
+
+### Rescheduling
+
+Customers can request a future delivery date for failed orders. Admins approve or reject requests. Approval clears the assignment, returns the order to `PENDING`, and records the transition; assignment can then be performed again through the admin assignment APIs.
+
+### Notifications
+
+Authenticated users can access only their own in-app notifications:
+
+- `GET /api/notifications`
+- `GET /api/notifications/unread-count`
+- `PUT /api/notifications/{id}/read`
+- `PUT /api/notifications/read-all`
+
+Important events also attempt email delivery when SMTP variables are configured. Email failures are logged and do not roll back business operations.
+
+## Testing
+
+```bash
+cd backend
+mvn clean compile
+mvn test
+
+cd ../frontend
+npm install
+npm run build
+```
+
+Behavioral API testing requires a running PostgreSQL instance and seeded zones, areas, rate cards, surcharges, users, and agents. The frontend can be previewed with `npm run preview` after a successful build.
+
+## Deployment Readiness
+
+Recommended deployment structure:
+
+- Backend: package and run the Spring Boot application.
+- Database: managed PostgreSQL with migrations or controlled Hibernate schema updates.
+- Frontend: build the React/Vite app and serve the generated `dist/` directory from a static host or reverse proxy.
+
+Set production environment variables through the hosting platform, never by committing `.env`. Use a random JWT secret, restricted database credentials, and real SMTP credentials only in the deployment secret store.
+
+## Known Limitations
+
+- No automated unit, integration, or end-to-end tests are currently included.
+- PostgreSQL and SMTP must be available and configured for full runtime verification.
+- Email delivery is best-effort; in-app notifications remain the durable notification record.
+- The project does not include deployment manifests, containerization, maps, GPS, SMS, or push notifications.
 
 ## License
 
