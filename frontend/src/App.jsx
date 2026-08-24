@@ -14,6 +14,8 @@ import AgentManagement from './pages/admin/AgentManagement';
 import OrderAssignment from './pages/admin/OrderAssignment';
 import OrderTrackingPage from './pages/OrderTrackingPage';
 import AgentOrdersPage from './pages/AgentOrdersPage';
+import RescheduleRequestPage from './pages/RescheduleRequestPage';
+import RescheduleManagement from './pages/admin/RescheduleManagement';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -47,7 +49,9 @@ function App() {
       <Route path="/orders/create" element={<ProtectedRoute><CreateOrderPage /></ProtectedRoute>} />
       <Route path="/orders/my" element={<ProtectedRoute><MyOrdersPage /></ProtectedRoute>} />
       <Route path="/orders/:id/tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
+      <Route path="/orders/:id/reschedule" element={<ProtectedRoute><RescheduleRequestPage /></ProtectedRoute>} />
       <Route path="/agent/orders" element={<ProtectedRoute><AgentOrdersPage /></ProtectedRoute>} />
+      <Route path="/admin/reschedule-requests" element={<ProtectedRoute><RescheduleManagement /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

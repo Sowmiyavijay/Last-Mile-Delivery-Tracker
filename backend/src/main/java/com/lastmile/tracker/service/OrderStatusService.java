@@ -37,6 +37,7 @@ public class OrderStatusService {
     private final DeliveryAgentRepository deliveryAgentRepository;
     private final TrackingHistoryService trackingHistoryService;
     private final OrderService orderService;
+    private final RescheduleRequestService rescheduleRequestService;
 
     @Transactional
     public OrderResponse updateStatus(Long orderId, OrderStatus newStatus) {
@@ -50,6 +51,9 @@ public class OrderStatusService {
         order.setStatus(newStatus);
         orderRepository.save(order);
         trackingHistoryService.append(order, newStatus, actor);
+        if (newStatus == OrderStatus.DELIVERED) {
+            rescheduleRequestService.completeApprovedRequest(orderId);
+        }
         return orderService.toResponse(order);
     }
 

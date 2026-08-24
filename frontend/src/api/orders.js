@@ -8,4 +8,6 @@ export const orderApi = {
     getTracking: (id) => apiClient.get(`/api/orders/${id}/tracking`),
     updateStatus: (id, status) => apiClient.put(`/api/orders/${id}/status`, { status }),
     getAssignedOrders: () => apiClient.get('/api/agent/orders'),
+    requestReschedule: (id, data) => apiClient.post(`/api/orders/${id}/reschedule`, data),
+    getRescheduleRequests: (id) => apiClient.get(`/api/orders/${id}/reschedule`),
 };

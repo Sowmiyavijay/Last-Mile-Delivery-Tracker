@@ -4,12 +4,18 @@ import { Link } from 'react-router-dom';
 
 function MyOrdersPage() {
   const [orders, setOrders] = useState([]);
+  const [reschedules, setReschedules] = useState({});
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = async () => {
     try {
       const { data } = await orderApi.getMyOrders();
       setOrders(data);
+      const requestEntries = await Promise.all(data.map(async order => {
+        const response = await orderApi.getRescheduleRequests(order.id);
+        return [order.id, response.data];
+      }));
+      setReschedules(Object.fromEntries(requestEntries));
     } catch (e) {
       console.error(e);
       alert("Error fetching orders");
@@ -42,6 +48,7 @@ function MyOrdersPage() {
               <th>Status</th>
               <th>Date</th>
               <th>Tracking</th>
+              <th>Reschedule</th>
             </tr>
           </thead>
           <tbody>
@@ -56,6 +63,16 @@ function MyOrdersPage() {
                 <td>{o.status}</td>
                 <td>{new Date(o.createdAt).toLocaleString()}</td>
                 <td><Link to={`/orders/${o.id}/tracking`}>Track</Link></td>
+                <td>
+                  {o.status === 'FAILED' && (
+                    <Link to={`/orders/${o.id}/reschedule`}>Request Reschedule</Link>
+                  )}
+                  {reschedules[o.id]?.map(request => (
+                    <div key={request.id}>
+                      {request.requestedDate} - {request.reason} ({request.status})
+                    </div>
+                  ))}
+                </td>
               </tr>
             ))}
           </tbody>

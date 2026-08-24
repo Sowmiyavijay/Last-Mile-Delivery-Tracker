@@ -33,4 +33,9 @@ export const adminApi = {
     getOrder: (orderId) => apiClient.get(`/api/admin/orders/${orderId}`),
     manualAssign: (orderId, agentId) => apiClient.put(`/api/admin/orders/${orderId}/assign/${agentId}`),
     autoAssign: (orderId) => apiClient.post(`/api/admin/orders/${orderId}/auto-assign`),
+
+    // Reschedule requests
+    getRescheduleRequests: () => apiClient.get('/api/admin/reschedule-requests'),
+    approveReschedule: (id) => apiClient.put(`/api/admin/reschedule-requests/${id}/approve`),
+    rejectReschedule: (id) => apiClient.put(`/api/admin/reschedule-requests/${id}/reject`),
 };

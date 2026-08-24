@@ -47,6 +47,7 @@ function DashboardPage() {
             <li><Link to="/admin/cod-surcharges" className="btn btn-primary">COD Surcharges</Link></li>
             <li><Link to="/admin/agents" className="btn btn-primary">Agents</Link></li>
             <li><Link to="/admin/assignments" className="btn btn-primary">Assignments</Link></li>
+            <li><Link to="/admin/reschedule-requests" className="btn btn-primary">Reschedules</Link></li>
           </ul>
         </div>
       )}

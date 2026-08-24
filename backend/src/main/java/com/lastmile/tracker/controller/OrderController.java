@@ -1,13 +1,16 @@
 package com.lastmile.tracker.controller;
 
 import com.lastmile.tracker.dto.order.CreateOrderRequest;
+import com.lastmile.tracker.dto.order.CreateRescheduleRequest;
 import com.lastmile.tracker.dto.order.OrderResponse;
 import com.lastmile.tracker.dto.order.PriceCalculationRequest;
 import com.lastmile.tracker.dto.order.PriceCalculationResponse;
 import com.lastmile.tracker.dto.order.StatusUpdateRequest;
 import com.lastmile.tracker.dto.order.TrackingHistoryResponse;
+import com.lastmile.tracker.dto.order.RescheduleRequestResponse;
 import com.lastmile.tracker.service.OrderStatusService;
 import com.lastmile.tracker.service.TrackingHistoryService;
+import com.lastmile.tracker.service.RescheduleRequestService;
 import com.lastmile.tracker.service.OrderService;
 import com.lastmile.tracker.service.PricingService;
 import jakarta.validation.Valid;
@@ -28,6 +31,7 @@ public class OrderController {
     private final PricingService pricingService;
     private final OrderStatusService orderStatusService;
     private final TrackingHistoryService trackingHistoryService;
+    private final RescheduleRequestService rescheduleRequestService;
 
     @PostMapping("/price")
     public ResponseEntity<PriceCalculationResponse> calculatePrice(@Valid @RequestBody PriceCalculationRequest request) {
@@ -61,5 +65,16 @@ public class OrderController {
     @GetMapping("/{id}/tracking")
     public ResponseEntity<List<TrackingHistoryResponse>> getTracking(@PathVariable Long id) {
         return ResponseEntity.ok(trackingHistoryService.getTracking(id));
+    }
+
+    @PostMapping("/{id}/reschedule")
+    public ResponseEntity<RescheduleRequestResponse> requestReschedule(
+            @PathVariable Long id, @Valid @RequestBody CreateRescheduleRequest request) {
+        return new ResponseEntity<>(rescheduleRequestService.create(id, request), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}/reschedule")
+    public ResponseEntity<List<RescheduleRequestResponse>> getRescheduleRequests(@PathVariable Long id) {
+        return ResponseEntity.ok(rescheduleRequestService.getCustomerRequests(id));
     }
 }
